@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Portal | Login</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="apple-touch-icon" href="Icon.jpeg">
+
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('sw.js');
+        });
+      }
+    </script>
+
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #ffffff; 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding-top: 50px; 
+            padding-bottom: 40px;
+        }
+        .container { 
+            width: 100%; 
+            max-width: 400px; 
+            text-align: center; 
+            padding: 20px;
+        }
+        
+        #login-form { margin-top: 0px; }
+        #reg-form { margin-top: 10px; }
+
+        h2 { color: #222; margin-bottom: 25px; font-weight: 600; }
+        
+        input { 
+            width: 100%; 
+            padding: 14px; 
+            margin: 12px 0; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 16px;
+            background: #fafafa;
+        }
+        input:focus {
+            outline: none;
+            border-color: #007bff;
+            background: #fff;
+        }
+        
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: bold; 
+            margin-top: 15px; 
+            transition: 0.3s ease; 
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc !important; cursor: not-allowed; }
+        
+        .link { color: #007bff; cursor: pointer; margin-top: 20px; display: inline-block; font-size: 15px; }
+        #status { margin-top: 20px; font-size: 14px; font-weight: bold; min-height: 20px; color: #d93025; }
+
+        /* Footer Styles */
+        #login-footer {
+            margin-top: 40px;
+            /* මෙහි padding අගය මඳක් වැඩි කර Footer එක පහළට ගත්තා */
+            padding-top: 35px; 
+            border-top: 1px solid #eee;
+            font-size: 13px;
+            color: #444;
+            line-height: 1.6;
+        }
+        .legal-warning {
+            font-weight: bold;
+            color: #b71c1c;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 12px;
+        }
+        .company-details {
+            font-weight: 600;
+        }
+        .barcode-box {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="login-form">
+        <h2>Login</h2>
+        <input type="text" id="l-nic" placeholder="NIC අංකය">
+        <input type="password" id="l-pass" placeholder="මුරපදය">
+        <button id="btn-login" onclick="handleLogin()">Login</button>
+        <div class="link" onclick="toggleForm()">Register New Account</div>
+
+        <div id="login-footer">
+            <div class="legal-warning">
+                Notice: Any extraction or distribution of data from this system is considered intellectual property theft, and legal action will be initiated accordingly.
+            </div>
+            
+            <div class="company-details">
+                LIYANA WEB ZONE LANKA (PVT) LTD<br>
+                JALAN METRO PUDU, 55100 KUALA LUMPUR<br>
+                MALAYSIA - SINGAPORE
+            </div>
+
+            <div class="barcode-box">
+                <svg id="barcode"></svg>
+            </div>
+        </div>
+    </div>
+
+    <div id="reg-form" style="display: none;">
+        <h2>Register</h2>
+        <input type="text" id="r-name" placeholder="සම්පූර්ණ නම">
+        <input type="text" id="r-nic" placeholder="NIC අංකය">
+        <input type="email" id="r-email" placeholder="ඊමේල් ලිපිනය">
+        <input type="password" id="r-pass" placeholder="මුරපදය">
+        <button id="btn-reg" onclick="handleRegister()">Register</button>
+        <div class="link" onclick="toggleForm()">Back to Login</div>
+    </div>
+
+    <div id="status"></div>
+</div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwp52ioM8zfO77fJZlWfA9WkSBkb1Nk7mvZv7wa-rmb2hf1Ln6Jyu2yzk7X_BnzPYXg/exec"; 
+    const REDIRECT_URL = "https://liyana-web-zone.github.io/EC_MAIN_DASHBOARD/Index.html"; 
+
+    window.onload = function() { generateBarcode(); };
+
+    function generateBarcode() {
+        const barcodeElement = document.getElementById('barcode');
+        if(barcodeElement) {
+            JsBarcode("#barcode", "AC202603254562", {
+                format: "CODE128",
+                lineColor: "#000",
+                width: 1.8,
+                height: 40,
+                displayValue: true,
+                fontSize: 13,
+                background: "#ffffff"
+            });
+        }
+    }
+
+    function toggleForm() {
+        const loginForm = document.getElementById('login-form');
+        const regForm = document.getElementById('reg-form');
+        if (loginForm.style.display === 'none') {
+            loginForm.style.display = 'block';
+            regForm.style.display = 'none';
+            generateBarcode();
+        } else {
+            loginForm.style.display = 'none';
+            regForm.style.display = 'block';
+        }
+        document.getElementById('status').innerText = "";
+    }
+
+    async function handleLogin() {
+        const btn = document.getElementById('btn-login');
+        const status = document.getElementById('status');
+        btn.disabled = true;
+        
+        const params = new URLSearchParams({
+            action: 'login',
+            nic: document.getElementById('l-nic').value,
+            password: document.getElementById('l-pass').value
+        });
+        try {
+            const response = await fetch(WEB_APP_URL, { method: 'POST', body: params });
+            const data = await response.json();
+            if (data.result === "success") { 
+                window.location.href = REDIRECT_URL; 
+            } else { 
+                status.innerText = data.result; 
+                btn.disabled = false; 
+            }
+        } catch (e) { 
+            status.innerText = "Connection Error!"; 
+            btn.disabled = false; 
+        }
+    }
+
+    async function handleRegister() {
+        const btn = document.getElementById('btn-reg');
+        const status = document.getElementById('status');
+        btn.disabled = true;
+
+        const params = new URLSearchParams({
+            action: 'register',
+            name: document.getElementById('r-name').value,
+            nic: document.getElementById('r-nic').value,
+            email: document.getElementById('r-email').value,
+            password: document.getElementById('r-pass').value
+        });
+        try {
+            const response = await fetch(WEB_APP_URL, { method: 'POST', body: params });
+            const data = await response.json();
+            if (data.result === "success") { 
+                toggleForm(); 
+            } else { 
+                status.innerText = data.result; 
+                btn.disabled = false; 
+            }
+        } catch (e) { 
+            status.innerText = "Error!"; 
+            btn.disabled = false; 
+        }
+    }
+</script>
+
+</body>
+</html>
