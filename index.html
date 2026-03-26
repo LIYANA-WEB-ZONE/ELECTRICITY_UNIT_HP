@@ -2,7 +2,7 @@
 <html lang="si">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>User Portal | Login</title>
     
     <link rel="manifest" href="manifest.json">
@@ -25,11 +25,13 @@
             background: #ffffff; 
             display: flex; 
             justify-content: center; 
-            align-items: flex-start; 
-            min-height: 100vh; 
+            align-items: flex-start; /* මුලින් තිබූ මට්ටමටම තැබීමට */
+            height: 100vh; 
             margin: 0; 
             padding-top: 50px; 
             padding-bottom: 40px;
+            overflow: hidden; /* Scroll වීම අක්‍රීයයි */
+            box-sizing: border-box;
         }
         .container { 
             width: 100%; 
@@ -39,7 +41,7 @@
         }
         
         #login-form { margin-top: 0px; }
-        #reg-form { margin-top: 10px; }
+        #reg-form { margin-top: 0px; } /* Register එකත් Login මට්ටමටම ගත්තා */
 
         h2 { color: #222; margin-bottom: 25px; font-weight: 600; }
         
@@ -78,10 +80,9 @@
         .link { color: #007bff; cursor: pointer; margin-top: 20px; display: inline-block; font-size: 15px; }
         #status { margin-top: 20px; font-size: 14px; font-weight: bold; min-height: 20px; color: #d93025; }
 
-        /* Footer Styles */
+        /* Footer Styles - ඔයා මුලින් දුන්න විදිහටම */
         #login-footer {
             margin-top: 40px;
-            /* මෙහි padding අගය මඳක් වැඩි කර Footer එක පහළට ගත්තා */
             padding-top: 35px; 
             border-top: 1px solid #eee;
             font-size: 13px;
