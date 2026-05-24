@@ -1,343 +1,301 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="si">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>ELECTRICITY UNIT</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  
-<style>
-/* 💻 Desktop View Constraint */
-@media (min-width: 481px) {
-    html { background-color: #0f172a; display: flex; justify-content: center; }
-    body { max-width: 480px; margin: 0 auto; box-shadow: 0 0 50px rgba(0,0,0,0.5); position: relative; min-height: 100vh; }
-    #bellNotificationModal { width: 480px !important; left: 50% !important; transform: translateX(-50%) !important; }
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>User Portal | Login</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="apple-touch-icon" href="Icon.jpeg">
 
-body {
-  margin: 0; font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc;
-  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-  min-height: 100vh; padding: 20px 0; box-sizing: border-box;
-  overflow: hidden; 
-  touch-action: none; 
-  transition: filter 0.3s ease; /* පසුබිම සුමටව Blur වීමට */
-}
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
-/* 🌀 Toast එක පෙන්වන විට මුළු පිටුවම Blur කිරීමට යොදන Class එක */
-body.blur-bg #authView, 
-body.blur-bg #portalView {
-  filter: blur(8px);
-  pointer-events: none; /* Toast එක ඇති විට පිටුපස ක්ලික් කිරීම වැළැක්වීමට */
-}
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('sw.js');
+        });
+      }
+    </script>
 
-/* 🎭 Auth Style */
-.auth-container { width: 90%; background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 25px 20px; box-sizing: border-box; margin-top: 40px; transition: filter 0.3s ease; }
-.auth-title { font-size: 18px; font-weight: 700; color: #10b981; text-align: center; margin-bottom: 20px; }
-.form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
-.form-group label { font-size: 13px; color: #94a3b8; }
-.form-group input { background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 10px; color: #f8fafc; font-size: 14px; box-sizing: border-box; width: 100%; }
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #ffffff; 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; 
+            height: 100vh; 
+            margin: 0; 
+            padding-top: 50px; 
+            padding-bottom: 40px;
+            overflow: hidden; 
+            box-sizing: border-box;
+            transition: filter 0.3s ease;
+        }
+        body.no-scroll {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
 
-/* 🛠️ ලොගින් අකුරු මැදට ගැනීම */
-#loginNic, #loginPass { text-align: center; font-weight: 600; letter-spacing: 1px; }
+        /* පසුබිම බ්ලර් කරන සහ මදක් අඳුරු කරන කොටස */
+        body.popup-open .main-content {
+            filter: blur(6px) brightness(0.85); /* බ්ලර් සහ අඳුරු බව (Brightness 0.85) එක් කළා */
+            pointer-events: none;
+        }
 
-.auth-btn { width: 100%; background: #10b981; color: #0f172a; font-weight: 700; border: none; border-radius: 10px; padding: 12px; cursor: pointer; margin-top: 10px; }
-.toggle-auth { font-size: 13px; color: #94a3b8; text-align: center; margin-top: 15px; cursor: pointer; }
-.toggle-auth span { color: #10b981; font-weight: 600; }
+        .container { 
+            width: 100%; 
+            max-width: 400px; 
+            text-align: center; 
+            padding: 20px;
+        }
+        
+        #login-form { margin-top: 0px; }
+        #reg-form { margin-top: 0px; } 
 
-/* 🏦 Dashboard Style */
-.header-container { width: 90%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-.profile-section { display: flex; align-items: center; gap: 12px; }
-.profile-pic { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #10b981; object-fit: cover; }
-.user-name { font-size: 15px; font-weight: 700; color: #f8fafc; }
-.bell { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); position: relative; }
-.badge { position: absolute; right: 2px; top: 2px; background: #ef4444; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 999px; display: none; }
+        h2 { color: #222; margin-bottom: 25px; font-weight: 600; }
+        
+        input { 
+            width: 100%; 
+            padding: 14px; 
+            margin: 12px 0; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 16px;
+            background: #fafafa;
+        }
+        
+        #login-form input { text-align: center; }
+        #reg-form input { text-align: left; }
 
-.balance-card { width: 90%; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 20px; box-sizing: border-box; margin-bottom: 25px; }
+        input:focus {
+            outline: none;
+            border-color: #007bff;
+            background: #fff;
+        }
+        
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: bold; 
+            margin-top: 15px; 
+            transition: 0.3s ease; 
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc !important; cursor: not-allowed; }
+        
+        .link { color: #007bff; cursor: pointer; margin-top: 20px; display: inline-block; font-size: 15px; }
+        #status { margin-top: 20px; font-size: 14px; font-weight: bold; min-height: 20px; color: #d93025; }
 
-#goBtn { width: 90%; background: #10b981; color: #0f172a; font-weight: 700; padding: 14px; border: none; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 25px; }
+        #login-footer {
+            margin-top: 40px;
+            padding-top: 35px; 
+            border-top: 1px solid #eee;
+            font-size: 13px;
+            color: #444;
+            line-height: 1.6;
+        }
+        .legal-warning {
+            font-weight: bold;
+            color: #b71c1c;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 12px;
+        }
+        .company-details {
+            font-weight: 600;
+        }
+        .barcode-box {
+            margin-top: 10px;
+        }
 
-.section-title { width: 90%; font-size: 15px; font-weight: 700; color: #94a3b8; margin-bottom: 12px; }
-.buttons-grid { width: 90%; display: grid; grid-template-columns: 1fr 1fr; grid-gap: 14px; margin-bottom: 30px; }
-.extra-btn { background: #1e293b; border-radius: 16px; color: #f8fafc; padding: 18px 12px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 12px; font-weight: 600; font-size: 14px; }
-.extra-btn svg { color: #10b981; }
-
-.clean-links-container { width: 90%; display: flex; flex-direction: column; gap: 10px; margin-bottom: 40px; }
-.clean-link-item { display: flex; align-items: center; justify-content: space-between; text-decoration: none; padding: 14px 16px; border-radius: 12px; background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.03); color: #e2e8f0; font-size: 14px; }
-.clean-link-item svg { color: #10b981; margin-right: 12px; }
-
-/* 📋 Footer */
-.footer-container { width: 90%; text-align: center; margin-top: 10px; padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.05); }
-.footer-main { font-size: 11px; font-weight: 800; color: #10b981; letter-spacing: 0.5px; margin-bottom: 3px; }
-.footer-sub { font-size: 9px; font-weight: 600; color: #94a3b8; margin-bottom: 6px; }
-.footer-copy { font-size: 8px; font-weight: 500; color: #475569; }
-
-/* 🍞 විශාල කරන ලද, Icon සහිත සහ පසුබිම Blur කරන අලංකාර Popup Toast */
-#toastBox { 
-  visibility: hidden; 
-  width: 200px; /* 👈 බොක්ස් එක තරමක් විශාල කර ඇත */
-  min-height: 90px; 
-  background: #1e293b; 
-  color: #f8fafc; 
-  display: flex;
-  flex-direction: column; /* Icon එක උඩින් සහ Text එක පහළින් සිටීමට */
-  align-items: center;
-  justify-content: center;
-  text-align: center; 
-  border-radius: 20px; 
-  padding: 16px; 
-  position: fixed; 
-  top: 25vh; /* ඉහළ සහ මැද අතර ස්ථානය */
-  left: 50%;
-  transform: translate(-50%, -20px) scale(0.9);
-  z-index: 9999; /* Blur එකට ඉහළින් පැහැදිලිව පෙනීමට */
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top: 5px solid #ef4444; /* උඩින් ලස්සන Border එකක් */
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); 
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.4;
-  gap: 10px;
-  opacity: 0; 
-  transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-#toastBox.show { 
-  visibility: visible; 
-  opacity: 1; 
-  transform: translate(-50%, 0) scale(1); 
-}
-#toastBox.success { 
-  border-top-color: #10b981; 
-}
-
-/* Icons සතු විලාසිතාවන් */
-.toast-icon {
-  font-size: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-}
-.success .toast-icon {
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.1);
-}
-.error .toast-icon {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
-}
-
-/* 🔔 Modal */
-#bellNotificationModal { 
-  display: none; 
-  position: fixed; 
-  z-index: 100; 
-  left: 0; 
-  top: 0; 
-  width: 100%; 
-  height: 100%; 
-  background: rgba(0,0,0,0.6); 
-  backdrop-filter: blur(4px); 
-  align-items: flex-start; 
-  justify-content: center; 
-  padding-top: 15vh; 
-  box-sizing: border-box;
-}
-.modal-content { background: #1e293b; padding: 25px; border-radius: 16px; width: 80%; max-width: 300px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-.modal-close-btn { background: #10b981; color: #0f172a; border: none; padding: 10px; border-radius: 8px; width: 100%; font-weight: 700; cursor: pointer; margin-top: 15px; }
-</style>
+        /* --- Announcement Overlay (පසුබිම තවත් අඳුරු කළා) --- */
+        #announcement-overlay {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.45); /* අඳුරු බව වැඩි කළා */
+            z-index: 1000;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20vh;
+        }
+        .announcement-card {
+            background: white;
+            padding: 35px 20px; 
+            border-radius: 12px;
+            max-width: 280px; 
+            width: 75%;
+            text-align: center;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .announcement-card h3 { margin-top: 0; color: #007bff; font-size: 18px; margin-bottom: 15px; }
+        .announcement-card p { font-size: 15px; color: #333; line-height: 1.6; margin-bottom: 20px; }
+        .tap-hint { font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+    </style>
 </head>
-<body>
+<body id="main-body">
 
-  <div id="toastBox"></div>
-
-  <div id="authView" class="auth-container">
-    <div id="loginForm">
-      <div class="auth-title">ඇතුළු වීම (LOGIN)</div>
-      <div class="form-group"><label>NIC අංකය</label><input type="text" id="loginNic" placeholder="e.g. 199912345678"></div>
-      <div class="form-group"><label>මුරපදය</label><input type="password" id="loginPass" placeholder="123456"></div>
-      <button class="auth-btn" id="loginSubmitBtn">ඇතුලු වන්න</button>
-      <div class="toggle-auth" id="toRegister">ගිණුමක් නොමැතිද? <span>ලියාපදිංචි වන්න</span></div>
+<div id="announcement-overlay" onclick="closeAnnouncement()">
+    <div class="announcement-card">
+        <h3>පණිවිඩය</h3>
+        <p>පද්ධතියේ ආරක්ෂාව තහවුරු කිරීම සඳහා කරුණාකර ඔබ ලබා දී ඇති අංකය සහ මුරපදය පමණක් භාවිත කරන්න.</p>
+        <div class="tap-hint">ඉවත් කිරීමට ඕනෑම තැනක ස්පර්ශ කරන්න</div>
     </div>
+</div>
 
-    <div id="registerForm" style="display: none;">
-      <div class="auth-title">ලියාපදිංචි වීම (REGISTER)</div>
-      <div class="form-group"><label>සේවක නම</label><input type="text" id="regName" placeholder="e.g. Sanath Perera"></div>
-      <div class="form-group"><label>NIC අංකය</label><input type="text" id="regNic" placeholder="e.g. 199912345678"></div>
-      <div class="form-group"><label>ඊමේල් ලිපිනය</label><input type="email" id="regEmail" placeholder="example@mail.com"></div>
-      <div class="form-group"><label>මුරපදය</label><input type="password" id="regPass" placeholder="New Password"></div>
-      <div class="form-group"><label>ඡායාරූපය</label><input type="file" id="fileInput" accept="image/*"></div>
-      <button class="auth-btn" id="registerSubmitBtn">ලියාපදිංචි වන්න</button>
-      <div class="toggle-auth" id="toLogin">ගිණුමක් තිබේද? <span>ලොග් වන්න</span></div>
-    </div>
-  </div>
+<div class="main-content container">
+    <div id="login-form">
+        <h2>Login</h2>
+        <input type="text" id="l-nic" placeholder="NIC අංකය">
+        <input type="password" id="l-pass" placeholder="මුරපදය">
+        <button id="btn-login" onclick="handleLogin()">Login</button>
+        <div class="link" onclick="toggleForm()">Register New Account</div>
 
-  <div id="portalView" style="display: none; width: 100%;">
-    <div style="display:flex; flex-direction:column; align-items:center;">
-      <div class="header-container">
-        <div class="profile-section">
-          <img id="userImg" src="Logo Icon.jpg" class="profile-pic" />
-          <div class="profile-info">
-            <span style="font-size:12px; color:#94a3b8;">Welcome,</span><br>
-            <span class="user-name" id="profileName">USER</span>
-          </div>
+        <div id="login-footer">
+            <div class="legal-warning">
+                Notice : Any extraction or distribution of data from this system is considered intellectual property theft, and legal action will be initiated accordingly.
+            </div>
+            
+            <div class="company-details">
+                LIYANA WEB ZONE LANKA (PVT) LTD<br>
+                JALAN METRO PUDU, 55100 KUALA LUMPUR<br>
+                MALAYSIA - SINGAPORE
+            </div>
+
+            <div class="barcode-box">
+                <svg id="barcode"></svg>
+            </div>
         </div>
-        <div class="bell" id="bellBtn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          <div class="badge" id="notifBadge">1</div>
-        </div>
-      </div>
-
-      <div class="balance-card">
-        <p style="color:#10b981; font-size:13px; font-weight:600; margin:0;">PORTAL LOGGED IN</p>
-        <h2 style="font-size:20px; font-weight:800; margin:5px 0;">ELECTRICITY UNIT</h2>
-        <p style="font-size:12px; color:#94a3b8; margin:0;">Teaching Hospital - Polonnaruwa</p>
-      </div>
-
-      <button id="goBtn">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        <span>EMPLOYEE INFORMATION</span>
-      </button>
-
-      <div class="section-title">QUICK SERVICES</div>
-      <div class="buttons-grid">
-        <button class="extra-btn" id="btn1">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-          APPLICATION
-        </button>
-        <button class="extra-btn" id="btn2">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
-          EMP. LEAVES
-        </button>
-        <button class="extra-btn" id="btn3">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
-          PAYROLL SYS
-        </button>
-        <button class="extra-btn" id="btn4">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5v-15z"></path></svg>
-          E - LIBRARY
-        </button>
-      </div>
-
-      <div class="section-title">GENERAL WEB HUB</div>
-      <div class="clean-links-container">
-        <a href="https://www.nvq.gov.lk/" target="_blank" class="clean-link-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-            <span style="flex-grow:1">TVEC (NVQ CERTIFICATE)</span>
-            <span>▶</span>
-        </a>
-        <a href="https://ceb.lk/" target="_blank" class="clean-link-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-            <span style="flex-grow:1">CEB - SRI LANKA</span>
-            <span>▶</span>
-        </a>
-        <a href="https://www.health.gov.lk/" target="_blank" class="clean-link-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
-            <span style="flex-grow:1">MINISTRY OF HEALTH</span>
-            <span>▶</span>
-        </a>
-      </div>
-
-      <div class="footer-container">
-          <div class="footer-main">LIYANA WEB ZONE LANKA (PVT) LTD</div>
-          <div class="footer-sub">WDSP PORTAL ECOSYSTEM • KUALA LUMPUR, MALAYSIA</div>
-          <div class="footer-copy">© 2026 SECURE BANKING UI</div>
-      </div>
     </div>
-  </div>
 
-  <div id="bellNotificationModal">
-    <div class="modal-content">
-      <div style="color:#10b981; font-weight:700; margin-bottom:12px;">දැනුම්දීම</div>
-      <p id="bellModalMessage" style="font-size:14px; color:#94a3b8;"></p>
-      <button class="modal-close-btn" id="closeBellModal">Cancel</button>
+    <div id="reg-form" style="display: none;">
+        <h2>Register</h2>
+        <input type="text" id="r-name" placeholder="සම්පූර්ණ නම">
+        <input type="text" id="r-nic" placeholder="NIC අංකය">
+        <input type="email" id="r-email" placeholder="ඊමේල් ලිපිනය">
+        <input type="password" id="r-pass" placeholder="මුරපදය">
+        <button id="btn-reg" onclick="handleRegister()">Register</button>
+        <div class="link" onclick="toggleForm()">Back to Login</div>
     </div>
-  </div>
+
+    <div id="status"></div>
+</div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwWfPbD4TcELheM46hcLeVO1a3qr-er4n-QG4n-fvK_YugqCEm5j1SZFT3xzzd2VhdUog/exec";
-let userMsg = "";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwuwcm8lFh1YDyALpwxym3tcJ_Xbc---4jPCpy6Y4F92KWXmX9bJcMMb_7nmHXeSKMa/exec"; 
+    const REDIRECT_URL = "https://liyana-web-zone.github.io/EC_HP_WEB_DASHBOARD/Index.html"; 
 
-function showToast(msg, type="error") {
-  const t = document.getElementById('toastBox');
-  
-  // නිවැරදි වර්ගය අනුව Icon එක තේරීම (✔ හෝ ✖)
-  const icon = type === "success" ? "✔" : "✖";
-  
-  // HTML එක ඇතුලට Icon එක සහ Message එක එකතු කිරීම
-  t.innerHTML = `<div class="toast-icon">${icon}</div><div>${msg}</div>`; 
-  
-  if(type === "success") {
-    t.className = "show success";
-  } else {
-    t.className = "show error";
-  }
-  
-  // පසුබිම බ්ලර් (Blur) කිරීමේ Class එක සක්‍රීය කිරීම
-  document.body.classList.add("blur-bg");
-  
-  setTimeout(() => { 
-    t.classList.remove("show"); 
-    // බ්ලර් එක ඉවත් කිරීම
-    document.body.classList.remove("blur-bg");
-  }, 3000);
-}
+    const SHOW_ANNOUNCEMENT = true; 
 
-document.getElementById('toRegister').onclick = () => { document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='block'; };
-document.getElementById('toLogin').onclick = () => { document.getElementById('registerForm').style.display='none'; document.getElementById('loginForm').style.display='block'; };
+    window.onload = function() { 
+        generateBarcode(); 
+        if(SHOW_ANNOUNCEMENT) {
+            document.getElementById('announcement-overlay').style.display = 'flex';
+            document.getElementById('main-body').classList.add('no-scroll', 'popup-open');
+        }
+    };
 
-document.getElementById('loginSubmitBtn').onclick = async () => {
-  const nic = document.getElementById('loginNic').value.trim();
-  const pass = document.getElementById('loginPass').value.trim();
-  if(!nic || !pass) return showToast("විස්තර ඇතුළත් කරන්න");
-  const btn = document.getElementById('loginSubmitBtn');
-  btn.disabled = true; btn.textContent = "පරීක්ෂා කරමින්...";
-  try {
-    const res = await fetch(`${SCRIPT_URL}?action=login&nic=${nic}&pass=${pass}`);
-    const result = await res.json();
-    if(result.status === "success") {
-      document.getElementById('profileName').textContent = result.data.name.toUpperCase();
-      document.getElementById('userImg').src = result.data.image || "Logo Icon.jpg";
-      userMsg = result.data.notification || "ඔබව සාදරයෙන් පිළිගනිමු!";
-      document.getElementById('notifBadge').style.display = "flex";
-      document.getElementById('authView').style.display = "none";
-      
-      document.body.style.overflow = "auto";
-      document.body.style.touchAction = "auto";
-      
-      document.getElementById('portalView').style.display = "block";
-    } else { showToast("NIC/මුරපදය වැරදියි"); }
-  } catch(e) { showToast("Error!"); }
-  btn.disabled = false; btn.textContent = "ලොග් වන්න";
-};
+    function closeAnnouncement() {
+        document.getElementById('announcement-overlay').style.display = 'none';
+        document.getElementById('main-body').classList.remove('no-scroll', 'popup-open');
+    }
 
-document.getElementById('registerSubmitBtn').onclick = async () => {
-  const name = document.getElementById('regName').value;
-  const nic = document.getElementById('regNic').value;
-  const email = document.getElementById('regEmail').value;
-  const pass = document.getElementById('regPass').value;
-  const file = document.getElementById('fileInput').files[0];
-  if(!name || !nic || !file) return showToast("විස්තර අවශ්‍යයි");
-  const btn = document.getElementById('registerSubmitBtn');
-  btn.disabled = true; btn.textContent = "ලියාපදිංචි වෙමින්...";
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    try {
-      await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "register", name, nic, email, pass, image: e.target.result })});
-      showToast("සාර්ථකයි!", "success");
-      setTimeout(()=> location.reload(), 2000);
-    } catch(err) { showToast("දෝෂයකි!"); btn.disabled = false; btn.textContent = "ලියාපදිංචි වන්න"; }
-  };
-  reader.readAsDataURL(file);
-};
+    function generateBarcode() {
+        const barcodeElement = document.getElementById('barcode');
+        if(barcodeElement) {
+            JsBarcode("#barcode", "AC202603254562", {
+                format: "CODE128",
+                lineColor: "#000",
+                width: 1.8,
+                height: 40,
+                displayValue: true,
+                fontSize: 13,
+                background: "#ffffff"
+            });
+        }
+    }
 
-document.getElementById('bellBtn').onclick = () => { document.getElementById('bellModalMessage').textContent = userMsg; document.getElementById('bellNotificationModal').style.display = "flex"; };
-document.getElementById('closeBellModal').onclick = () => { document.getElementById('bellNotificationModal').style.display = "none"; document.getElementById('notifBadge').style.display = "none"; };
+    function toggleForm() {
+        const loginForm = document.getElementById('login-form');
+        const regForm = document.getElementById('reg-form');
+        if (loginForm.style.display === 'none') {
+            loginForm.style.display = 'block';
+            regForm.style.display = 'none';
+            generateBarcode();
+        } else {
+            loginForm.style.display = 'none';
+            regForm.style.display = 'block';
+        }
+        document.getElementById('status').innerText = "";
+    }
 
-document.getElementById('goBtn').onclick = () => window.location.href='https://liyana-web-zone.github.io/EC_EMPLOYEE_INFORMATION/Index.html';
-document.getElementById('btn2').onclick = () => window.location.href='https://liyana-web-zone.github.io/EC_HP_STAFF_LEAVE_WEB/Index.html';
-document.getElementById('btn3').onclick = () => window.location.href='https://liyana-web-zone.github.io/EC_PAYROLL_SYSTEM/Index.html';
+    async function handleLogin() {
+        const btn = document.getElementById('btn-login');
+        const status = document.getElementById('status');
+        btn.disabled = true;
+        const params = new URLSearchParams({
+            action: 'login',
+            nic: document.getElementById('l-nic').value,
+            password: document.getElementById('l-pass').value
+        });
+        try {
+            const response = await fetch(WEB_APP_URL, { method: 'POST', body: params });
+            const data = await response.json();
+            if (data.result === "success") { 
+                window.location.href = REDIRECT_URL; 
+            } else { 
+                status.innerText = data.result; 
+                btn.disabled = false; 
+            }
+        } catch (e) { 
+            status.innerText = "Connection Error!"; 
+            btn.disabled = false; 
+        }
+    }
+
+    async function handleRegister() {
+        const btn = document.getElementById('btn-reg');
+        const status = document.getElementById('status');
+        btn.disabled = true;
+        const params = new URLSearchParams({
+            action: 'register',
+            name: document.getElementById('r-name').value,
+            nic: document.getElementById('r-nic').value,
+            email: document.getElementById('r-email').value,
+            password: document.getElementById('r-pass').value
+        });
+        try {
+            const response = await fetch(WEB_APP_URL, { method: 'POST', body: params });
+            const data = await response.json();
+            if (data.result === "success") { 
+                toggleForm(); 
+            } else { 
+                status.innerText = data.result; 
+                btn.disabled = false; 
+            }
+        } catch (e) { 
+            status.innerText = "Error!"; 
+            btn.disabled = false; 
+        }
+    }
 </script>
+
 </body>
 </html>
